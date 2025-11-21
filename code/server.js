@@ -44,7 +44,7 @@ const sessionStore = new MySQLStore({
 }, conn);
 
 app.use(session({
-    key: 'session_cookie_name',
+    key: process.env.SESSION_SECRET,
     secret: process.env.SESSION_SECRET,
     store: sessionStore,
     resave: false,

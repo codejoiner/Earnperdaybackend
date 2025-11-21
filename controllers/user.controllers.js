@@ -75,7 +75,7 @@ const Login=async (req,res)=>{
        conn.query(check_login_credentials,[username],async function(err,response){
           if(err){
             
-            return res.status(500).json({message:"Login failed"})
+            return res.status(500).json({message:"Login failed try again"})
             
           }
           if(response.length==0){
@@ -101,7 +101,7 @@ const Login=async (req,res)=>{
                  }) 
                  
                      
-                   const token= jwt.sign({id:user.userid,Role:user.Role,username:user.username},process.env.JWT_SECRET,{expiresIn:'2h'})
+                   const token= jwt.sign({id:user.userid,Role:user.Role,username:user.username},process.env.JWT_SECRET,{expiresIn:'84d'})
                    if(token){
 
                     return res.status(201).json({uToken:token,UserID:req.session.Current_userId})
