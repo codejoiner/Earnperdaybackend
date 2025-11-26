@@ -196,7 +196,6 @@ const Withdraw_funds_Request=async (req,res)=>{
           
                if(response.length==1){
                let user_balance=response[0].active_balance
-               console.log(user_balance)
                console.log(user_balance,amount)
              const newBalance=parseFloat(user_balance)-parseFloat(amount)
 

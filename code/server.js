@@ -36,7 +36,7 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(morgan(process.env.IS_IN_PRODUCTION === 'production' ? 'combined' : 'dev'));
+app.use(morgan(process.env.IS_IN_PRODUCTION === 'production' ? 'dev' : 'combined'));
 
 const sessionStore = new MySQLStore({
     checkExpirationInterval: 900000,
