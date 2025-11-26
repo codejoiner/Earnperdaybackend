@@ -498,72 +498,68 @@ const approval_withdraw= async (req,res)=>{
 }
 
 
-const approval_deposit=async(req,res)=>{
-   const {userId}=req.params
-   const {deposit_id}=req.params
+const approval_deposit = async (req, res) => {
+   const { userId } = req.params
+   const { deposit_id } = req.params
 
-    try{
-      const check_deposit_request="SELECT `deposed_amount`,`status` FROM `deposit_request` WHERE userID=? AND deposit_id=?"
-      conn.query(check_deposit_request,[userId,deposit_id],async(err,response)=>{
-        if(err) throw err 
-        if(response.length==0){
-         return
-        }
-        if(response[0].status==='Completed'|response[0].status==='completed'){
-         return
-        }
-          if(response.length==1){
-            const amount=response[0].deposed_amount
-         
-           
+   try {
+      const check_deposit_request = "SELECT `deposed_amount`,`status` FROM `deposit_request` WHERE userID=? AND deposit_id=?"
+      conn.query(check_deposit_request, [userId, deposit_id], function (err, response) {
+         if (err) throw err
 
-            const Retrieve_u_balance="SELECT  COALESCE(active_Balance,0) AS u_active_balance FROM account_balance WHERE UserID=?"
-            conn.query(Retrieve_u_balance,[userId],await function(err,response){
-                
-               if(err) throw err
-             
+         if (response.length == 0) {
+            return
+         }
 
-                   if(response.length==0){
-                  const make_Deposit="INSERT INTO `account_balance`(`UserID`, `active_Balance`) VALUES (?,?)"
-                  conn.query(make_Deposit,[userId,amount],async(err,response)=>{
-                     if(err) throw err
-                     if(response.affectedRows==1){
-                        const update_status="UPDATE `deposit_request` SET `status`='completed' WHERE userID=?"
-                        conn.query(update_status,[userId],await function(err){
-                           if(err) throw err
-                           return                 
+         if (response[0].status === 'Completed' || response[0].status === 'completed') {
+            return
+         }
+
+         if (response.length == 1) {
+            const amount = response[0].deposed_amount
+
+            const Retrieve_u_balance = "SELECT COALESCE(active_Balance,0) AS u_active_balance FROM account_balance WHERE UserID=?"
+            conn.query(Retrieve_u_balance, [userId], function (err, response) {
+
+               if (err) throw err
+
+               if (response.length == 0) {
+                  const make_Deposit = "INSERT INTO `account_balance`(`UserID`, `active_Balance`) VALUES (?,?)"
+                  conn.query(make_Deposit, [userId, amount], function (err, response) {
+                     if (err) throw err
+                     if (response.affectedRows == 1) {
+
+                        const update_status = "UPDATE `deposit_request` SET `status`='completed' WHERE userID=? AND deposit_id=?"
+                        conn.query(update_status, [userId, deposit_id], function (err) {
+                           if (err) throw err
+                           return
                         })
                      }
-
                   })
                }
 
+               if (response.length == 1) {
+                  const CurrentBalance = response[0].u_active_balance
+                  const TotalBalance = parseFloat(CurrentBalance) + parseFloat(amount)
 
+                  const updateBalance = "UPDATE `account_balance` SET `active_Balance`=? WHERE UserID=?"
+                  conn.query(updateBalance, [TotalBalance, userId], function (err) {
+                     if (err) throw err
 
-                if(response.length==1){
-                  const CurrentBalance=response[0].u_active_balance
-                  const TotalBalance=parseFloat(CurrentBalance)+parseFloat(amount)
-                   const updateBalance="UPDATE `account_balance` SET `active_Balance`=? WHERE UserID=?"
-                   conn.query(updateBalance,[TotalBalance,userId],(err)=>{
-                     if(err) throw err
-                 
-                        const updateStatus="UPDATE `deposit_request` SET `status`='completed' WHERE userID=? AND deposit_id=?"
-                        conn.query(updateStatus,[userId,deposit_id],(err)=>{
-                           if(err) throw err
-                           return
-                        })
-                  
-                   })
-                }
-                
-               })
-          }
+                     const updateStatus = "UPDATE `deposit_request` SET `status`='completed' WHERE userID=? AND deposit_id=?"
+                     conn.query(updateStatus, [userId, deposit_id], function (err) {
+                        if (err) throw err
+                        return
+                     })
+                  })
+               }
+            })
+         }
       })
 
-    }
-     catch(error){
-      console.log('Error in approval deposit controller',error.message)
-     }
+   } catch (error) {
+      console.log('Error in approval deposit controller', error.message)
+   }
 
 }
 
